@@ -18,7 +18,7 @@ import (
 var validate = validator.New()
 var userCollection *mongo.Collection = configs.GetMongoCollection(configs.DB, "users")
 
-// CreateUser creates a new user
+// POST CreateUser creates a new user
 func CreateUser(c *fiber.Ctx) error {
 
 	context, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -49,7 +49,6 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	userToAppend := models.User{
-		Id: primitive.NewObjectID(),
 		Name: user.Name,
 	}
 
@@ -60,7 +59,7 @@ func CreateUser(c *fiber.Ctx) error {
 		log.Fatal(err)
 	}
 
-	// Return the new user if successful
+	// Return the new user if successfully created
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"status":  http.StatusCreated,
 		"msg": "User created successfully",
@@ -69,12 +68,12 @@ func CreateUser(c *fiber.Ctx) error {
 	
 }
 
-// Get Single User by ID
+// GET Single User by ID
 func GetUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	// Get the ID from the URL
-	id := c.Params("Id")
+	// Get the user's object _id from the request params
+	id := c.Params("id")
 	var user models.User
 	defer cancel()
 
@@ -90,7 +89,7 @@ func GetUser(c *fiber.Ctx) error {
 		})
 	}
 
-	// Find the user in the database
+	// Find the user in the database based on the '_id'/ objectID
 	err = userCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
 	if err != nil {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{
@@ -101,6 +100,36 @@ func GetUser(c *fiber.Ctx) error {
 			},
 		})
 	}
+
+	// Return the user if successful
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status":  http.StatusOK,
+		"msg": "User found successfully",
+		"data":   user,
+	})
+}
+
+// GET Single User by Name
+func GetUserByName(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	// Get the user's object _id from the request params
+	var user models.User
+	defer cancel()
+	
+	name := c.Params("name")
+	// Find the user in the database based on the name field
+	err := userCollection.FindOne(ctx, bson.M{"name": name}).Decode(&user)
+	if err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"status": http.StatusNotFound,
+			"msg":  "User not found",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
 
 	// Return the user if successful
 	return c.Status(http.StatusOK).JSON(fiber.Map{

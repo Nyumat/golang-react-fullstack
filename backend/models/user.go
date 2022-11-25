@@ -1,11 +1,6 @@
 package models
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-// User is the model for a user
+// Model for a user in the database
 type User struct {
-	Id    primitive.ObjectID `json:"id,omitempty" bson:"id,omitempty"`
 	Name  string		 `json:"name,omitempty" bson:"name,omitempty" validate:"required"`
 }
