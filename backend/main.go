@@ -46,6 +46,50 @@ func main() {
 		return c.SendString("Hello, Nyumat!")
 	})
 
+	Todos := [] Todo {
+		{ID: 1, Title: "Wash Nyumat's Clothes", Done: false, Body: "Body 1"},
+		{ID: 2, Title: "Clean Nyumat's Codebase", Done: false, Body: "Body 2"},
+		{ID: 3, Title: "Find Nyumat better food", Done: false, Body: "Body 3"},
+	}
+
+	app.Get("/todos", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"success": true,
+			"data":    Todos,
+		})
+	})
+
+	app.Get("/todos/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+		return c.SendString("Todo " + id)
+	})
+
+	app.Post("/todos", func(c *fiber.Ctx) error {
+		type Request struct {
+			Title string `json:"title"`
+			Body  string `json:"body"`
+		}
+
+		var body Request
+
+		if err := c.BodyParser(&body); err != nil {
+			return err
+		}
+
+		Todos = append(Todos, Todo{
+			ID:    len(Todos) + 1,
+			Title: body.Title,
+			Done:  false,
+			Body:  body.Body,
+		})
+
+		return c.JSON(fiber.Map{
+			"success": true,
+			"data":    Todos,
+		})
+	})
+
+
 	// Start server with port from .env
 	port := func() string {
 		err := godotenv.Load(".env")
