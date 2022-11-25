@@ -12,3 +12,9 @@ Instead of using Node.js like I usually do for the server-side, we'll be using G
 - Mantine
 - TypeScript -->
 
+### Todo List:
+      - Graceful error handling on both ends
+      - Decide on a project scope? (Todos/School System/IDK Yet)
+      - Complete all routes in BE router
+      - Add npm script command to concurrently run both FE and BE
+
