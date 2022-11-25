@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-
+	"backend/configs"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -20,18 +19,17 @@ type Todo struct {
 }
 
 func main() {
-	fmt.Println("Starting server...")
-
 	// Create new Fiber instance
 	app := fiber.New(fiber.Config{
-		// Prefork:       true,
 		CaseSensitive: true,
 		StrictRouting: true,
 		ServerHeader:  "Fiber",
 		AppName:       "Fiber",
 	})
 
-	// Middleware
+	configs.MongoConnect()
+
+	// Middleware 
 	app.Use(logger.New())
 	app.Use(recover.New())
 	app.Use(cors.New(
@@ -43,7 +41,9 @@ func main() {
 
 	// Routes
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, Nyumat!")
+		return c.JSON(fiber.Map{
+			"msg": "Hello Nyumat!",
+		})
 	})
 
 	Todos := [] Todo {
