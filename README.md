@@ -4,7 +4,6 @@ I haven't touched Vite since [NyumatFlix](https://github.com/Nyumat/NyumatFlix) 
 
 > Instead of using Node.js like I usually do for the server-side, we'll be using Go and specifically FiberV2. I really like how verbose Fiber is and it makes developing a web server very similar to the way in which it's done in Express.js and Python's Flask.
 
-
 ## Specs
 - Go
 - Fiber
@@ -12,6 +11,10 @@ I haven't touched Vite since [NyumatFlix](https://github.com/Nyumat/NyumatFlix) 
 - TypeScript
 - React
 <!-- - Mantine -->
+
+## Setup
+In Development mode, use `make -j2` to run the frontend and backend servers concurrently.
+
 ## API Reference
 ```
 // Get a user by their ObjectID
