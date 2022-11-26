@@ -53,7 +53,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 
-	// Create a new MongoDB document
+	// Insert new MongoDB document to the users collection
 	result, err := userCollection.InsertOne(context, userToAppend)
 	if err != nil {
 		log.Fatal(err)
@@ -136,6 +136,41 @@ func GetUserByName(c *fiber.Ctx) error {
 		"status":  http.StatusOK,
 		"msg": "User found successfully",
 		"data":   user,
+	})
+}
+
+// GET All Users
+func GetUsers(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Find all users in the database
+	cursor, err := userCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"status": http.StatusInternalServerError,
+			"msg":  "Error getting users",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// Create a slice of users
+	var users []models.User
+
+	// Iterate through the cursor and append the users to the slice
+	for cursor.Next(ctx) {
+		var user models.User
+		cursor.Decode(&user)
+		users = append(users, user)
+	}
+
+	// Return the users if successful
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status":  http.StatusOK,
+		"msg": "Users found successfully",
+		"data":   users,
 	})
 }
 
