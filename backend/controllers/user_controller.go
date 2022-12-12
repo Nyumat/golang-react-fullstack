@@ -174,4 +174,108 @@ func GetUsers(c *fiber.Ctx) error {
 	})
 }
 
+// PUT Update User by ID
+func UpdateUser(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Get the user's object _id from the request params
+	id := c.Params("id")
+
+	// Convert the ID to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status": http.StatusBadRequest,
+			"msg":  "Invalid user ID",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// New user
+	var user models.User
+
+	// Parse the body into the user model
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status": http.StatusBadRequest,
+			"msg":  "Invalid user data",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// Validate the user model
+	if err := validate.Struct(&user); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status": http.StatusBadRequest,
+			"msg": "Invalid user data",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// Update the user in the database
+	result, err := userCollection.UpdateOne(ctx, bson.M{"_id": objectID}, bson.M{"$set": user})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"status": http.StatusInternalServerError,
+			"msg":  "Error updating user",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// Signal that the user was updated
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status":  http.StatusOK,
+		"msg": "User updated successfully",
+		"data":   result,
+	})
+}
+
+// DELETE User by ID
+func DeleteUser(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Get the user's object _id from the request params
+	id := c.Params("id")
+
+	// Convert the ID to an ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"status": http.StatusBadRequest,
+			"msg":  "Invalid user ID",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// Delete the user in the database
+	result, err := userCollection.DeleteOne(ctx, bson.M{"_id": objectID})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"status": http.StatusInternalServerError,
+			"msg":  "Error deleting user",
+			"data":   &fiber.Map{
+				"error": err.Error(),
+			},
+		})
+	}
+
+	// Signal that the user was deleted
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status":  http.StatusOK,
+		"msg": "User deleted successfully",
+		"data":   result,
+	})
+}
 
